@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚣 Wanderfahrt Einteilung</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a3252">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --navy:       #1a3252;
+      --blue:       #2471a3;
+      --light-blue: #5dade2;
+      --sky:        #eaf4fb;
+      --white:      #ffffff;
+      --g100:       #f8f9fa;
+      --g200:       #e9ecef;
+      --g300:       #dee2e6;
+      --g500:       #adb5bd;
+      --g600:       #6c757d;
+      --g800:       #343a40;
+      --green:      #1e8449;
+      --red:        #c0392b;
+      --gold:       #e6b800;
+      --shadow:     0 2px 10px rgba(0,0,0,0.11);
+      --radius:     9px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #eef3f8;
+      color: var(--g800);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #0d2137 0%, var(--navy) 60%, #1a4a7a 100%);
+      color: #fff;
+      padding: 0 20px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.35);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .header-inner { max-width: 1120px; margin: 0 auto; }
+    .header-top { display: flex; align-items: center; gap: 12px; padding: 14px 0 10px; }
+    .header-logo { font-size: 30px; }
+    .header-title { font-size: 21px; font-weight: 800; letter-spacing: -.4px; }
+    .header-sub { font-size: 12px; opacity: .6; margin-top: 1px; }
+    .tab-nav { display: flex; }
+    .tab-btn {
+      padding: 11px 22px; border: none; background: transparent;
+      color: rgba(255,255,255,.6); cursor: pointer; font-size: 14px; font-weight: 500;
+      border-bottom: 3px solid transparent; transition: all .18s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--light-blue); }
+
+    /* ── MAIN ── */
+    main { max-width: 1120px; margin: 0 auto; padding: 22px 16px 60px; }
+
+    /* ── STATS ROW ── */
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 12px; margin-bottom: 22px; }
+    .stat {
+      background: #fff; border-radius: var(--radius); padding: 14px 16px;
+      box-shadow: var(--shadow); border-top: 3px solid var(--blue);
+    }
+    .stat-val { font-size: 30px; font-weight: 800; color: var(--navy); line-height: 1; }
+    .stat-lbl { font-size: 12px; color: var(--g600); margin-top: 3px; }
+
+    /* ── CARD ── */
+    .card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .card-head {
+      padding: 15px 20px; border-bottom: 1px solid var(--g200);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 7px; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all .16s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--navy); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover { background: #155a35; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #922b21; }
+    .btn-outline { background: transparent; color: var(--blue); border: 1.5px solid var(--blue); }
+    .btn-outline:hover { background: var(--sky); }
+    .btn-ghost { background: transparent; color: var(--g600); border: 1.5px solid var(--g300); }
+    .btn-ghost:hover { border-color: var(--red); color: var(--red); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; padding: 9px 16px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px; color: var(--g600);
+      background: var(--g100); border-bottom: 1px solid var(--g200);
+    }
+    td { padding: 11px 16px; border-bottom: 1px solid var(--g200); font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--sky); }
+
+    /* ── BADGES / CHIPS ── */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-obmann { background: #fef9e7; color: #856404; border: 1px solid #f0c030; }
+    .chip { padding: 2px 8px; background: var(--sky); color: var(--blue); border-radius: 20px; font-size: 11px; display: inline-block; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 3px; }
+
+    /* ── STARS ── */
+    .stars { letter-spacing: 1px; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 52px 24px; color: var(--g600); }
+    .empty-ico { font-size: 52px; margin-bottom: 12px; }
+    .empty-ttl { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: var(--g500); }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.48); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal {
+      background: #fff; border-radius: 13px; width: 100%; max-width: 490px;
+      max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,.32);
+    }
+    .modal-head {
+      padding: 20px 24px 15px; border-bottom: 1px solid var(--g200);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--navy); }
+    .modal-close {
+      background: none; border: none; cursor: pointer; font-size: 19px;
+      color: var(--g500); width: 30px; height: 30px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: var(--g200); color: var(--g800); }
+    .modal-body { padding: 20px 24px; }
+    .modal-foot { padding: 14px 24px; border-top: 1px solid var(--g200); display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── FORM ── */
+    .fg { margin-bottom: 16px; }
+    .flbl { display: block; font-size: 13px; font-weight: 600; color: var(--g800); margin-bottom: 5px; }
+    .finp {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--g300);
+      border-radius: 7px; font-size: 14px; outline: none; transition: border-color .2s;
+    }
+    .finp:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(36,113,163,.13); }
+    .finfo { font-size: 12px; color: var(--g500); margin-top: 4px; }
+
+    /* Star rating */
+    .star-row { display: flex; gap: 2px; }
+    .sbtn { background: none; border: none; font-size: 26px; cursor: pointer; color: var(--g300); transition: color .12s; padding: 0 1px; }
+    .sbtn.on { color: var(--gold); }
+
+    /* Toggle */
+    .tog-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
+    .tog-inp { display: none; }
+    .tog-track {
+      width: 44px; height: 24px; background: var(--g300); border-radius: 12px;
+      position: relative; transition: background .2s; flex-shrink: 0;
+    }
+    .tog-track::after {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform .2s;
+    }
+    .tog-inp:checked + .tog-track { background: var(--green); }
+    .tog-inp:checked + .tog-track::after { transform: translateX(20px); }
+
+    /* Multi-select for preferences */
+    .psel {
+      border: 1.5px solid var(--g300); border-radius: 7px; padding: 8px;
+      max-height: 190px; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 4px;
+    }
+    .psel-lbl {
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+      padding: 5px 8px; border-radius: 5px; font-size: 13px;
+    }
+    .psel-lbl:hover { background: var(--sky); }
+
+    /* Size buttons */
+    .size-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sbsize {
+      width: 48px; height: 48px; border: 2px solid var(--g300); border-radius: 9px;
+      background: #fff; cursor: pointer; font-size: 18px; font-weight: 700;
+      transition: all .15s;
+    }
+    .sbsize:hover { border-color: var(--blue); color: var(--blue); }
+    .sbsize.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* ── DAY TABS ── */
+    .day-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .dtab {
+      padding: 7px 18px; border: 2px solid var(--g300); border-radius: 22px;
+      background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s;
+    }
+    .dtab:hover { border-color: var(--blue); color: var(--blue); }
+    .dtab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* ── BOATS GRID ── */
+    .boats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 16px; }
+    .boot-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .boot-head {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff; padding: 13px 16px;
+    }
+    .boot-name { font-size: 16px; font-weight: 800; }
+    .boot-meta { font-size: 12px; opacity: .75; margin-top: 2px; }
+    .boot-body { padding: 10px; }
+    .crew-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 8px; border-radius: 7px; transition: background .12s;
+    }
+    .crew-row:hover { background: var(--sky); }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: var(--light-blue); color: #fff; font-weight: 800; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar.obmann { background: var(--gold); color: #333; }
+    .crew-name { font-size: 14px; font-weight: 600; flex: 1; }
+    .crew-stars { font-size: 11px; color: var(--gold); }
+    .empty-seat { display: flex; align-items: center; gap: 10px; padding: 7px 8px; opacity: .35; }
+    .empty-avatar {
+      width: 34px; height: 34px; border-radius: 50%; border: 2px dashed var(--g400);
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .strength-bar { height: 5px; background: var(--g200); border-radius: 3px; margin: 10px 0 4px; overflow: hidden; }
+    .strength-fill { height: 100%; background: linear-gradient(90deg, var(--light-blue), var(--navy)); border-radius: 3px; transition: width .5s; }
+    .strength-lbl { font-size: 11px; color: var(--g600); text-align: right; }
+
+    /* ── EINTEILUNG ACTIONS ── */
+    .ein-actions { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; align-items: center; }
+
+    /* ── WARNING BOX ── */
+    .warnbox {
+      background: #fef9e7; border: 1px solid #f0c030; border-radius: 8px;
+      padding: 11px 15px; margin-bottom: 16px; font-size: 13px; color: #856404;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 22px; right: 22px; background: var(--g800); color: #fff;
+      padding: 11px 18px; border-radius: 8px; font-size: 14px; z-index: 300;
+      box-shadow: 0 4px 20px rgba(0,0,0,.3); animation: slideIn .25s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .hidden { display: none !important; }
+
+    /* ── INACTIVE ROWS ── */
+    tr.inaktiv td { opacity: .38; }
+    tr.inaktiv td:first-child strong { text-decoration: line-through; }
+    .badge-inaktiv { background: #f1f3f5; color: var(--g600); border: 1px solid var(--g300); }
+    .tog-aktiv {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none; transition: all .15s;
+    }
+    .tog-aktiv.on  { background: #d4edda; color: #155724; }
+    .tog-aktiv.off { background: #f1f3f5; color: var(--g600); }
+    .tog-aktiv:hover { filter: brightness(.93); }
+
+    /* ── SWAP ── */
+    .crew-row.clickable { cursor: pointer; }
+    .crew-row.clickable:hover { background: #dbeafe; }
+    .crew-row.clickable:hover .crew-name::after { content: ' ⇄'; opacity: .5; font-size: 12px; }
+    .crew-row.swap-selected { background: #fef9c3 !important; outline: 2px solid var(--gold); border-radius: 7px; }
+    .empty-seat.clickable { cursor: pointer; opacity: 1 !important; }
+    .empty-seat.clickable:hover { background: #dbeafe; border-radius: 7px; }
+
+    .swap-person-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px; cursor: pointer;
+      transition: background .12s; border: 2px solid transparent;
+    }
+    .swap-person-row:hover { background: var(--sky); border-color: var(--blue); }
+    .swap-person-row.is-selected { background: #fef9c3; border-color: var(--gold); }
+    .swap-boot-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--g600); padding: 6px 0 2px; margin-top: 4px;
+    }
+    .swap-boat-tag {
+      font-size: 11px; background: var(--sky); color: var(--blue);
+      padding: 1px 7px; border-radius: 10px; font-weight: 600; white-space: nowrap;
+    }
+
+    /* ── SETTINGS TAB ── */
+    .cfg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; }
+    .cfg-section { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .cfg-section-head { padding:14px 18px; border-bottom:1px solid var(--g200); display:flex; align-items:center; gap:10px; }
+    .cfg-section-ico  { font-size:20px; }
+    .cfg-section-title{ font-size:15px; font-weight:700; color:var(--navy); }
+    .cfg-section-body { padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+
+    /* Theme swatches */
+    .theme-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .theme-swatch {
+      width:48px; height:48px; border-radius:50%; cursor:pointer; border:3px solid transparent;
+      transition:transform .15s, box-shadow .15s; position:relative;
+    }
+    .theme-swatch:hover { transform:scale(1.12); }
+    .theme-swatch.active { border-color:#fff; box-shadow:0 0 0 3px var(--navy), 0 4px 12px rgba(0,0,0,.25); }
+    .theme-swatch-label { font-size:11px; text-align:center; margin-top:4px; color:var(--g600); }
+    .theme-item { display:flex; flex-direction:column; align-items:center; }
+
+    /* Stats grid */
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stat-mini { background:var(--sky); border-radius:8px; padding:10px 12px; }
+    .stat-mini-val { font-size:22px; font-weight:800; color:var(--navy); }
+    .stat-mini-lbl { font-size:11px; color:var(--g600); margin-top:1px; }
+
+    /* Pair list */
+    .pair-row { display:flex; align-items:center; gap:8px; font-size:13px; padding:4px 0; border-bottom:1px solid var(--g200); }
+    .pair-row:last-child { border-bottom:none; }
+    .pair-count { margin-left:auto; background:var(--sky); color:var(--blue); padding:1px 8px; border-radius:10px; font-weight:700; font-size:12px; }
+
+    /* Big action buttons in settings */
+    .cfg-btn {
+      display:flex; align-items:center; gap:10px; padding:12px 16px;
+      border-radius:8px; border:none; cursor:pointer; font-size:14px; font-weight:600;
+      transition:all .15s; width:100%; text-align:left;
+    }
+    .cfg-btn-ico { font-size:20px; }
+    .cfg-btn-green  { background:#d4edda; color:#155724; }
+    .cfg-btn-green:hover  { background:#c3e6cb; }
+    .cfg-btn-blue   { background:var(--sky); color:var(--navy); }
+    .cfg-btn-blue:hover   { background:#d0eaf8; }
+    .cfg-btn-red    { background:#f8d7da; color:#721c24; }
+    .cfg-btn-red:hover    { background:#f5c6cb; }
+
+    /* ── PWA INSTALL BANNER ── */
+    .install-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 400;
+      background: var(--navy); color: #fff;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .install-banner-icon { font-size: 28px; flex-shrink: 0; }
+    .install-banner-text { flex: 1; }
+    .install-banner-title { font-size: 14px; font-weight: 700; }
+    .install-banner-sub   { font-size: 12px; opacity: .7; margin-top: 2px; }
+    .install-banner-btns  { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-install {
+      background: var(--light-blue); color: #fff; border: none;
+      padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .btn-install:hover { background: #4a9fd4; }
+    .btn-dismiss {
+      background: transparent; color: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.3);
+      padding: 8px 12px; border-radius: 7px; font-size: 13px; cursor: pointer;
+    }
+    .btn-dismiss:hover { color: #fff; border-color: rgba(255,255,255,.6); }
+
+    @media (max-width: 580px) {
+      .tab-btn { padding: 9px 13px; font-size: 12px; }
+      .boats-grid { grid-template-columns: 1fr; }
+      .stat-val { font-size: 24px; }
+    }
+
+    /* ── RESPONSIVE TABLE ── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    .col-name-sub { display: none; font-size: 11px; color: var(--g500); margin-top: 2px; }
+
+    /* Columns to hide on small screens */
+    @media (max-width: 640px) {
+      .col-hide  { display: none !important; }
+      .col-name-sub { display: block; }
+
+      /* Tighter name cell so it doesn't push buttons off */
+      td.col-name, th.col-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* Shorter toggle buttons */
+      .tog-aktiv .t-long  { display: none; }
+      .tog-aktiv .t-short { display: inline; }
+
+      /* Action buttons: stack or tighten */
+      .act-cell { white-space: nowrap; }
+    }
+    @media (min-width: 641px) {
+      .tog-aktiv .t-long  { display: inline; }
+      .tog-aktiv .t-short { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-top">
+      <span class="header-logo">🚣</span>
+      <div>
+        <div class="header-title" id="header-title">Wanderfahrt Einteilung</div>
+        <div class="header-sub" id="header-sub">Ruderboot Crew-Management</div>
+      </div>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('personen')">👥 Personen</button>
+      <button class="tab-btn"        onclick="switchTab('boote')">🚤 Boote</button>
+      <button class="tab-btn"        onclick="switchTab('einteilung')">📋 Einteilung</button>
+      <button class="tab-btn"        onclick="switchTab('einstellungen')">⚙️ Einstellungen</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="s-pers">0</div><div class="stat-lbl" id="s-pers-lbl">Personen</div></div>
+    <div class="stat"><div class="stat-val" id="s-boot">0</div><div class="stat-lbl" id="s-boot-lbl">Boote</div></div>
+    <div class="stat"><div class="stat-val" id="s-pltz">0</div><div class="stat-lbl">Aktive Plätze</div></div>
+    <div class="stat"><div class="stat-val" id="s-tage">0</div><div class="stat-lbl">Fahrt-Tage</div></div>
+  </div>
+
+  <!-- PERSONEN -->
+  <div id="tab-personen" class="tab-panel">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Teilnehmer der Wanderfahrt</span>
+        <button class="btn btn-primary" onclick="openPersonModal()">+ Person hinzufügen</button>
+      </div>
+      <div id="pers-list"></div>
+    </div>
+  </div>
+
+  <!-- BOOTE -->
+  <div id="tab-boote" class="tab-panel hidden">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Boote</span>
+        <button class="btn btn-primary" onclick="openBootModal()">+ Boot hinzufügen</button>
+      </div>
+      <div id="boot-list"></div>
+    </div>
+  </div>
+
+  <!-- EINTEILUNG -->
+  <div id="tab-einteilung" class="tab-panel hidden">
+    <div class="ein-actions">
+      <button class="btn btn-success" onclick="generateDay()">🎲 Neuen Tag generieren</button>
+      <button class="btn btn-ghost" id="clear-btn" onclick="clearAllDays()" style="display:none">🗑 Alle Tage löschen</button>
+    </div>
+    <div id="day-tabs"></div>
+    <div id="ein-content"></div>
+  </div>
+
+  <!-- EINSTELLUNGEN -->
+  <div id="tab-einstellungen" class="tab-panel hidden">
+    <div class="cfg-grid">
+
+      <!-- Wanderfahrt -->
+      <div class="cfg-section">
+        <div class="cfg-section-head"><span class="cfg-section-ico">🚣</span><span class="cfg-section-title">Wanderfahrt</span></div>
+        <div class="cfg-section-body">
+          <div class="fg" style="margin:0">
+            <label class="flbl">Name der Fahrt</label>
+            <input class="finp" id="cfg-name" placeholder="z.B. Rheinfahrt 2026" oninput="saveCfgName()">
+          </div>
+          <div class="fg" style="margin:0">
+            <label class="flbl">Gewässer / Route</label>
+            <input class="finp" id="cfg-gwasser" placeholder="z.B. Rhein, Mosel …" oninput="saveCfgGwasser()">
+            <div class="finfo">Wird im Header als Untertitel angezeigt</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Import / Export -->
+      <div class="cfg-section">
+        <div class="cfg-section-head"><span class="cfg-section-ico">💾</span><span class="cfg-section-title">Import / Export</span></div>
+        <div class="cfg-section-body">
+          <button class="cfg-btn cfg-btn-green" onclick="exportData()">
+            <span class="cfg-btn-ico">📤</span>
+            <div><div style="font-weight:700">Daten exportieren</div><div style="font-size:12px;opacity:.7">Alle Daten als .json speichern &amp; teilen</div></div>
+          </button>
+          <button class="cfg-btn cfg-btn-blue" onclick="importData()">
+            <span class="cfg-btn-ico">📥</span>
+            <div><div style="font-weight:700">Daten importieren</div><div style="font-size:12px;opacity:.7">.json-Datei laden und wiederherstellen</div></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistiken -->
+      <div class="cfg-section">
+        <div class="cfg-section-head"><span class="cfg-section-ico">📊</span><span class="cfg-section-title">Statistiken</span></div>
+        <div class="cfg-section-body" id="cfg-stats">
+          <div class="empty" style="padding:20px"><div style="font-size:32px">📊</div><div style="font-size:14px;margin-top:8px;color:var(--g500)">Noch keine Tage generiert</div></div>
+        </div>
+      </div>
+
+      <!-- Gefahrenzone -->
+      <div class="cfg-section" style="border-top:3px solid var(--red)">
+        <div class="cfg-section-head"><span class="cfg-section-ico">⚠️</span><span class="cfg-section-title" style="color:var(--red)">Gefahrenzone</span></div>
+        <div class="cfg-section-body">
+          <button class="cfg-btn cfg-btn-red" onclick="resetAllData()">
+            <span class="cfg-btn-ico">🗑️</span>
+            <div><div style="font-weight:700">Alle Daten löschen</div><div style="font-size:12px;opacity:.7">Personen, Boote &amp; alle Einteilungen unwiderruflich entfernen</div></div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- PERSON MODAL -->
+<div class="overlay hidden" id="pm-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="pm-title">Person hinzufügen</span>
+      <button class="modal-close" onclick="closePersonModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label class="flbl">Name *</label>
+        <input class="finp" id="pm-name" type="text" placeholder="Vor- und Nachname">
+      </div>
+      <div class="fg">
+        <label class="flbl">Ruderstärke</label>
+        <div class="star-row" id="pm-stars">
+          <button class="sbtn" onclick="setStaerke(1)">★</button>
+          <button class="sbtn" onclick="setStaerke(2)">★</button>
+          <button class="sbtn" onclick="setStaerke(3)">★</button>
+          <button class="sbtn" onclick="setStaerke(4)">★</button>
+          <button class="sbtn" onclick="setStaerke(5)">★</button>
+        </div>
+        <div class="finfo">1 = Anfänger · 5 = Sehr erfahren</div>
+      </div>
+      <div class="fg">
+        <label class="tog-label">
+          <input type="checkbox" class="tog-inp" id="pm-obmann">
+          <span class="tog-track"></span>
+          Ist Obmann / Obfrau
+        </label>
+        <div class="finfo" style="margin-top:6px">Obmänner werden bevorzugt als Steuerperson eingeteilt</div>
+      </div>
+      <div class="fg">
+        <label class="flbl">Vorlieben — fährt gerne mit</label>
+        <div class="psel" id="pm-psel"></div>
+        <div class="finfo">Bevorzugte Boot-Partner (wird bei der Zuteilung berücksichtigt)</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closePersonModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="savePerson()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOT MODAL -->
+<div class="overlay hidden" id="bm-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="bm-title">Boot hinzufügen</span>
+      <button class="modal-close" onclick="closeBootModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label class="flbl">Boot-Name *</label>
+        <input class="finp" id="bm-name" type="text" placeholder="z.B. Neptun, Blauer Pfeil …">
+      </div>
+      <div class="fg">
+        <label class="flbl">Bootstyp / Beschreibung</label>
+        <input class="finp" id="bm-typ" type="text" placeholder="z.B. Vierer mit Steuermann, Skiff …">
+      </div>
+      <div class="fg">
+        <label class="flbl">Anzahl Plätze</label>
+        <div class="size-btns" id="bm-sizes">
+          <button class="sbsize" onclick="setGroesse(1)">1</button>
+          <button class="sbsize" onclick="setGroesse(2)">2</button>
+          <button class="sbsize" onclick="setGroesse(3)">3</button>
+          <button class="sbsize" onclick="setGroesse(4)">4</button>
+          <button class="sbsize" onclick="setGroesse(5)">5</button>
+        </div>
+        <div class="finfo">Anzahl der Ruderplätze inklusive Steuermann</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeBootModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveBoot()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====================================================================
+   STATE
+==================================================================== */
+let S = {
+  personen: [], boote: [], tage: [],
+  activeTab: 'personen', activeDay: 0,
+  editPersId: null, editBootId: null,
+  tmpStaerke: 3, tmpGroesse: 4,
+  nextPId: 1, nextBId: 1,
+  cfg: { fahrtName: 'Wanderfahrt', gewässer: '', theme: 'marine' }
+};
+
+function save() {
+  try { localStorage.setItem('wf-v2', JSON.stringify(S)); } catch(e) { console.error('save failed', e); }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem('wf-v2');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d && typeof d === 'object') {
+      if (Array.isArray(d.personen)) S.personen = d.personen;
+      if (Array.isArray(d.boote))    S.boote    = d.boote;
+      if (Array.isArray(d.tage))     S.tage     = d.tage;
+      if (d.nextPId) S.nextPId = d.nextPId;
+      if (d.nextBId) S.nextBId = d.nextBId;
+      if (d.cfg)     S.cfg     = { ...S.cfg, ...d.cfg };
+      if (d.activeDay !== undefined) S.activeDay = d.activeDay;
+    }
+  } catch(e) { console.error('load failed', e); }
+}
+
+/* ====================================================================
+   TABS
+==================================================================== */
+function switchTab(t) {
+  S.activeTab = t;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.remove('hidden');
+  const idx = ['personen','boote','einteilung','einstellungen'].indexOf(t);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if (t === 'einteilung') renderEinteilung();
+  if (t === 'einstellungen') renderEinstellungen();
+  updateStats();
+}
+
+/* ====================================================================
+   STATS
+==================================================================== */
+function updateStats() {
+  const aktivPers  = S.personen.filter(p => p.aktiv !== false);
+  const aktivBoote = S.boote.filter(b => b.aktiv !== false);
+  document.getElementById('s-pers').textContent = aktivPers.length;
+  document.getElementById('s-pers-lbl').textContent =
+    aktivPers.length < S.personen.length ? `Personen (${S.personen.length - aktivPers.length} fehlen)` : 'Personen';
+  document.getElementById('s-boot').textContent = aktivBoote.length;
+  document.getElementById('s-boot-lbl').textContent =
+    aktivBoote.length < S.boote.length ? `Boote (${S.boote.length - aktivBoote.length} inaktiv)` : 'Boote';
+  document.getElementById('s-pltz').textContent = aktivBoote.reduce((a,b)=>a+b.groesse,0);
+  document.getElementById('s-tage').textContent = S.tage.length;
+}
+
+/* ====================================================================
+   RENDER PERSONEN
+==================================================================== */
+function renderPersonen() {
+  const el = document.getElementById('pers-list');
+  if (!S.personen.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">🚣</div><div class="empty-ttl">Noch keine Personen eingetragen</div><div class="empty-sub">Füge Teilnehmer über den Button oben hinzu</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th class="col-name">Name</th>
+      <th class="col-hide">Stärke</th>
+      <th class="col-hide">Rolle</th>
+      <th class="col-hide">Vorlieben</th>
+      <th>Status</th>
+      <th class="act-cell"></th>
+    </tr></thead>
+    <tbody>${S.personen.map(p => {
+      const aktiv = p.aktiv !== false;
+      const vl = p.vorlieben.map(id => {
+        const x = S.personen.find(q=>q.id===id);
+        return x ? `<span class="chip">${esc(firstName(x.name))}</span>` : '';
+      }).join('');
+      const nameExtra = p.istObmann ? ' <span style="font-size:11px">⚓</span>' : '';
+      return `<tr class="${aktiv ? '' : 'inaktiv'}">
+        <td class="col-name"><strong>${esc(p.name)}</strong>${nameExtra}</td>
+        <td class="col-hide"><span class="stars" style="color:var(--gold)">${'★'.repeat(p.staerke)}<span style="opacity:.2">${'★'.repeat(5-p.staerke)}</span></span></td>
+        <td class="col-hide">${p.istObmann ? '<span class="badge badge-obmann">⚓ Obmann</span>' : '<span style="color:var(--g500);font-size:12px">—</span>'}</td>
+        <td class="col-hide"><div class="chip-list">${vl || '<span style="color:var(--g500);font-size:12px">Keine</span>'}</div></td>
+        <td><button class="tog-aktiv ${aktiv?'on':'off'}" onclick="togglePersAktiv(${p.id})">
+          <span class="t-short">${aktiv ? '✓' : '✗'}</span>
+          <span class="t-long">${aktiv ? '✓ Dabei' : '✗ Fehlt'}</span>
+        </button></td>
+        <td class="act-cell">
+          <button class="btn btn-outline btn-sm" onclick="openPersonModal(${p.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deletePers(${p.id})">🗑</button>
+        </td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+/* ====================================================================
+   RENDER BOOTE
+==================================================================== */
+function renderBoote() {
+  const el = document.getElementById('boot-list');
+  if (!S.boote.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">🚤</div><div class="empty-ttl">Noch keine Boote angelegt</div><div class="empty-sub">Füge Boote über den Button oben hinzu</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th class="col-name">Boot</th>
+      <th class="col-hide">Typ</th>
+      <th class="col-hide">Plätze</th>
+      <th>Status</th>
+      <th class="act-cell"></th>
+    </tr></thead>
+    <tbody>${S.boote.map(b => {
+      const aktiv = b.aktiv !== false;
+      return `<tr class="${aktiv ? '' : 'inaktiv'}">
+        <td class="col-name">
+          <strong>${esc(b.name)}</strong>
+          <div class="col-name-sub">${'🪑'.repeat(b.groesse)}${b.typ ? ' · '+esc(b.typ) : ''}</div>
+        </td>
+        <td class="col-hide">${esc(b.typ||'—')}</td>
+        <td class="col-hide">${'🪑'.repeat(b.groesse)} <span style="color:var(--g600);font-size:12px">(${b.groesse})</span></td>
+        <td><button class="tog-aktiv ${aktiv?'on':'off'}" onclick="toggleBootAktiv(${b.id})">
+          <span class="t-short">${aktiv ? '✓' : '✗'}</span>
+          <span class="t-long">${aktiv ? '✓ Im Einsatz' : '✗ Nicht genutzt'}</span>
+        </button></td>
+        <td class="act-cell">
+          <button class="btn btn-outline btn-sm" onclick="openBootModal(${b.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteBoot(${b.id})">🗑</button>
+        </td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+/* ====================================================================
+   RENDER EINTEILUNG
+==================================================================== */
+function renderEinteilung() {
+  const tabs = document.getElementById('day-tabs');
+  const cont = document.getElementById('ein-content');
+  const clrBtn = document.getElementById('clear-btn');
+
+  if (!S.tage.length) {
+    tabs.innerHTML = '';
+    clrBtn.style.display = 'none';
+    const noData = !S.personen.length || !S.boote.length;
+    cont.innerHTML = `<div class="card"><div class="empty">
+      <div class="empty-ico">${noData ? '📋' : '🎲'}</div>
+      <div class="empty-ttl">${noData ? 'Noch keine Daten vorhanden' : 'Noch keine Einteilung generiert'}</div>
+      <div class="empty-sub">${noData ? 'Trage zuerst Personen und Boote ein' : 'Klicke auf „Neuen Tag generieren" um die erste Bootseinteilung zu erstellen'}</div>
+    </div></div>`;
+    return;
+  }
+
+  clrBtn.style.display = 'inline-flex';
+  if (S.activeDay >= S.tage.length) S.activeDay = S.tage.length - 1;
+
+  tabs.innerHTML = `<div class="day-tabs">${S.tage.map((_,i) =>
+    `<button class="dtab ${i===S.activeDay?'active':''}" onclick="switchDay(${i})">Tag ${i+1}</button>`
+  ).join('')}</div>`;
+
+  renderDayContent(S.tage[S.activeDay], cont);
+}
+
+function renderDayContent(tag, el) {
+  const dn = S.activeDay + 1;
+  const assigned = new Set(tag.boote.flatMap(b=>b.besatzung));
+  const unassigned = S.personen.filter(p=>!assigned.has(p.id));
+
+  let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <h2 style="font-size:18px;font-weight:800;color:var(--navy)">Tag ${dn} — Bootseinteilung</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="exportTxt(${S.activeDay})">📄 Als TXT</button>
+      <button class="btn btn-outline btn-sm" onclick="exportImg(${S.activeDay})">🖼️ Als Bild</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteDay(${S.activeDay})">🗑 Tag löschen</button>
+    </div>
+  </div>`;
+
+  if (unassigned.length)
+    html += `<div class="warnbox">⚠️ Nicht zugeteilt (zu wenig Plätze): <strong>${unassigned.map(p=>esc(p.name)).join(', ')}</strong></div>`;
+
+  html += '<div class="boats-grid">';
+  tag.boote.forEach(ba => {
+    const boot = S.boote.find(b=>b.id===ba.bootId);
+    if (!boot) return;
+    const crew = ba.besatzung.map(id=>S.personen.find(p=>p.id===id)).filter(Boolean);
+    const total = crew.reduce((s,p)=>s+p.staerke,0);
+    const avg = crew.length ? (total/crew.length).toFixed(1) : '—';
+    const pct = boot.groesse*5 > 0 ? Math.round(total/(boot.groesse*5)*100) : 0;
+    const obmann = crew.find(p=>p.istObmann);
+
+    html += `<div class="boot-card">
+      <div class="boot-head">
+        <div class="boot-name">🚤 ${esc(boot.name)}</div>
+        <div class="boot-meta">${esc(boot.typ||'')}${boot.typ?' · ':''}${crew.length}/${boot.groesse} Plätze${obmann?' · ⚓ '+esc(firstName(obmann.name)):''}</div>
+      </div>
+      <div class="boot-body">
+        ${crew.map(p=>{
+          const ini = p.name.split(' ').map(n=>n[0]||'').join('').toUpperCase().slice(0,2);
+          return `<div class="crew-row clickable" onclick="openSwapModal(${p.id}, ${S.activeDay})">
+            <div class="avatar ${p.istObmann?'obmann':''}">${ini}</div>
+            <div>
+              <div class="crew-name">${esc(p.name)}${p.istObmann?' ⚓':''}</div>
+              <div class="crew-stars">${'★'.repeat(p.staerke)}${'☆'.repeat(5-p.staerke)}</div>
+            </div></div>`;
+        }).join('')}
+        ${Array.from({length:boot.groesse-crew.length},(_,slotIdx)=>`
+          <div class="empty-seat clickable" onclick="openSwapModal(null, ${S.activeDay}, ${ba.bootId})">
+            <div class="empty-avatar">+</div>
+            <span style="font-size:13px;color:var(--blue);font-weight:600">Person hinzufügen</span>
+          </div>`).join('')}
+        <div class="strength-bar"><div class="strength-fill" style="width:${pct}%"></div></div>
+        <div class="strength-lbl">Ø Stärke: ${avg} · Gesamt: ${total}</div>
+      </div></div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ====================================================================
+   ALGORITHM
+==================================================================== */
+function generateDay() {
+  if (!S.personen.length) { toast('❌ Keine Personen eingetragen!'); return; }
+  if (!S.boote.length)    { toast('❌ Keine Boote angelegt!'); return; }
+
+  const aktivePers  = S.personen.filter(p => p.aktiv !== false);
+  const aktiveBoote = S.boote.filter(b => b.aktiv !== false);
+  if (!aktivePers.length)  { toast('❌ Keine aktiven Personen!'); return; }
+  if (!aktiveBoote.length) { toast('❌ Keine aktiven Boote!'); return; }
+  const assignment = computeAssignment(aktivePers, aktiveBoote, S.tage);
+  S.tage.push(assignment);
+  S.activeDay = S.tage.length - 1;
+  save();
+  renderEinteilung();
+  updateStats();
+  toast(`✅ Tag ${S.tage.length} erfolgreich generiert!`);
+}
+
+function computeAssignment(personen, boote, history) {
+  /* Build pair history */
+  const hist = {};
+  history.forEach(tag => tag.boote.forEach(ba => {
+    for (let i=0;i<ba.besatzung.length;i++)
+      for (let j=i+1;j<ba.besatzung.length;j++) {
+        const k = pk(ba.besatzung[i], ba.besatzung[j]);
+        hist[k] = (hist[k]||0) + 1;
+      }
+  }));
+
+  /* Build preference set */
+  const prefs = new Set();
+  personen.forEach(p => p.vorlieben.forEach(id => prefs.add(pk(p.id,id))));
+
+  /* Mutable crew structures */
+  const crews = boote.map(b=>({ bootId:b.id, groesse:b.groesse, besatzung:[] }));
+  const assigned = new Set();
+
+  /* Phase 1 — assign one Obmann per boat (randomised order) */
+  const obs = shuffle([...personen.filter(p=>p.istObmann)]);
+  const shuffledCrews = shuffle([...crews]);
+  obs.forEach(o => {
+    const c = shuffledCrews.find(c =>
+      c.besatzung.length < c.groesse &&
+      !c.besatzung.some(id => personen.find(p=>p.id===id)?.istObmann)
+    );
+    if (c) { c.besatzung.push(o.id); assigned.add(o.id); }
+  });
+
+  /* Phase 2 — distribute remaining by strength (greedy with scoring) */
+  const rest = [
+    ...obs.filter(o=>!assigned.has(o.id)),
+    ...personen.filter(p=>!p.istObmann)
+  ].sort((a,b)=>b.staerke-a.staerke);
+
+  rest.forEach(person => {
+    const avail = crews.filter(c=>c.besatzung.length < c.groesse);
+    if (!avail.length) return;
+    let best=null, bestS=-Infinity;
+    avail.forEach(c => {
+      const s = scoreInsert(person, c, personen, hist, prefs);
+      if (s>bestS) { bestS=s; best=c; }
+    });
+    if (best) { best.besatzung.push(person.id); assigned.add(person.id); }
+  });
+
+  /* Phase 3 — improvement via pairwise swaps */
+  improve(crews, personen, hist, prefs, 80);
+
+  return { boote: crews.map(c=>({ bootId:c.bootId, besatzung:[...c.besatzung] })) };
+}
+
+function scoreInsert(person, crew, personen, hist, prefs) {
+  const members = crew.besatzung.map(id=>personen.find(p=>p.id===id)).filter(Boolean);
+  const globalAvg = personen.reduce((s,p)=>s+p.staerke,0)/personen.length;
+  const newAvg = (members.reduce((s,p)=>s+p.staerke,0)+person.staerke)/(members.length+1);
+  let score = -Math.abs(newAvg - globalAvg) * 10;
+  members.forEach(m => {
+    const k = pk(person.id, m.id);
+    score -= (hist[k]||0) * 22;
+    if (prefs.has(k)) score += 9;
+  });
+  return score;
+}
+
+function scoreCrew(crew, personen, hist, prefs) {
+  const members = crew.besatzung.map(id=>personen.find(p=>p.id===id)).filter(Boolean);
+  const globalAvg = personen.reduce((s,p)=>s+p.staerke,0)/personen.length;
+  const avg = members.length ? members.reduce((s,p)=>s+p.staerke,0)/members.length : 0;
+  let score = -Math.abs(avg-globalAvg)*10;
+  for (let i=0;i<members.length;i++) for (let j=i+1;j<members.length;j++) {
+    const k = pk(members[i].id, members[j].id);
+    score -= (hist[k]||0)*22;
+    if (prefs.has(k)) score += 9;
+  }
+  return score;
+}
+
+function improve(crews, personen, hist, prefs, maxIter) {
+  for (let iter=0; iter<maxIter; iter++) {
+    let improved = false;
+    for (let i=0;i<crews.length;i++) for (let j=i+1;j<crews.length;j++) {
+      for (let pi=0;pi<crews[i].besatzung.length;pi++) {
+        for (let pj=0;pj<crews[j].besatzung.length;pj++) {
+          const pA = personen.find(p=>p.id===crews[i].besatzung[pi]);
+          const pB = personen.find(p=>p.id===crews[j].besatzung[pj]);
+          if (!pA||!pB) continue;
+          /* Don't create a boat with two Obmänner */
+          const ciHasOb = crews[i].besatzung.some(id=>id!==pA.id && personen.find(p=>p.id===id)?.istObmann);
+          const cjHasOb = crews[j].besatzung.some(id=>id!==pB.id && personen.find(p=>p.id===id)?.istObmann);
+          if (pB.istObmann && ciHasOb) continue;
+          if (pA.istObmann && cjHasOb) continue;
+
+          const before = scoreCrew(crews[i],personen,hist,prefs) + scoreCrew(crews[j],personen,hist,prefs);
+          [crews[i].besatzung[pi], crews[j].besatzung[pj]] = [pB.id, pA.id];
+          const after = scoreCrew(crews[i],personen,hist,prefs) + scoreCrew(crews[j],personen,hist,prefs);
+          if (after > before) { improved = true; }
+          else { [crews[i].besatzung[pi], crews[j].besatzung[pj]] = [pA.id, pB.id]; }
+        }
+      }
+    }
+    if (!improved) break;
+  }
+}
+
+/* ====================================================================
+   PERSON MODAL
+==================================================================== */
+function openPersonModal(id=null) {
+  S.editPersId = id;
+  const p = id!==null ? S.personen.find(x=>x.id===id) : null;
+  document.getElementById('pm-title').textContent = p ? 'Person bearbeiten' : 'Person hinzufügen';
+  document.getElementById('pm-name').value = p ? p.name : '';
+  document.getElementById('pm-obmann').checked = p ? p.istObmann : false;
+  S.tmpStaerke = p ? p.staerke : 3;
+  updateStars();
+  renderPsel(p ? p.vorlieben : [], id);
+  document.getElementById('pm-overlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('pm-name').focus(), 50);
+}
+function closePersonModal() { document.getElementById('pm-overlay').classList.add('hidden'); }
+
+function renderPsel(sel, excludeId) {
+  const others = S.personen.filter(p=>p.id!==excludeId);
+  const el = document.getElementById('pm-psel');
+  if (!others.length) { el.innerHTML='<div style="color:var(--g500);font-size:13px;padding:6px">Keine anderen Personen vorhanden</div>'; return; }
+  el.innerHTML = others.map(p=>`<label class="psel-lbl">
+    <input type="checkbox" value="${p.id}" ${sel.includes(p.id)?'checked':''}>
+    ${esc(p.name)}
+  </label>`).join('');
+}
+
+function savePerson() {
+  const name = document.getElementById('pm-name').value.trim();
+  if (!name) { toast('❌ Bitte Namen eingeben!'); document.getElementById('pm-name').focus(); return; }
+  const istObmann = document.getElementById('pm-obmann').checked;
+  const vorlieben = [...document.querySelectorAll('#pm-psel input:checked')].map(c=>+c.value);
+  if (S.editPersId!==null) {
+    const p = S.personen.find(x=>x.id===S.editPersId);
+    Object.assign(p, {name, staerke:S.tmpStaerke, istObmann, vorlieben});
+    toast('✅ Person aktualisiert');
+  } else {
+    S.personen.push({ id:S.nextPId++, name, staerke:S.tmpStaerke, istObmann, vorlieben });
+    toast('✅ Person hinzugefügt');
+  }
+  closePersonModal(); renderPersonen(); updateStats(); save();
+}
+
+function togglePersAktiv(id) {
+  const p = S.personen.find(x => x.id === id);
+  if (!p) return;
+  p.aktiv = p.aktiv === false ? true : false;
+  save(); renderPersonen(); updateStats();
+  toast(p.aktiv ? `✓ ${firstName(p.name)} ist wieder dabei` : `✗ ${firstName(p.name)} wurde deaktiviert`);
+}
+
+function deletePers(id) {
+  if (!confirm('Person wirklich löschen?')) return;
+  S.personen = S.personen.filter(p=>p.id!==id);
+  S.personen.forEach(p=>{ p.vorlieben=p.vorlieben.filter(v=>v!==id); });
+  renderPersonen(); updateStats(); save(); toast('🗑 Person gelöscht');
+}
+
+function setStaerke(v) { S.tmpStaerke=v; updateStars(); }
+function updateStars() {
+  document.querySelectorAll('#pm-stars .sbtn').forEach((b,i)=>b.classList.toggle('on',i<S.tmpStaerke));
+}
+
+/* ====================================================================
+   BOOT MODAL
+==================================================================== */
+function openBootModal(id=null) {
+  S.editBootId = id;
+  const b = id!==null ? S.boote.find(x=>x.id===id) : null;
+  document.getElementById('bm-title').textContent = b ? 'Boot bearbeiten' : 'Boot hinzufügen';
+  document.getElementById('bm-name').value = b ? b.name : '';
+  document.getElementById('bm-typ').value  = b ? b.typ||'' : '';
+  S.tmpGroesse = b ? b.groesse : 4;
+  updateSizes();
+  document.getElementById('bm-overlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('bm-name').focus(), 50);
+}
+function closeBootModal() { document.getElementById('bm-overlay').classList.add('hidden'); }
+
+function saveBoot() {
+  const name = document.getElementById('bm-name').value.trim();
+  if (!name) { toast('❌ Bitte Boot-Namen eingeben!'); return; }
+  const typ = document.getElementById('bm-typ').value.trim();
+  if (S.editBootId!==null) {
+    const b = S.boote.find(x=>x.id===S.editBootId);
+    Object.assign(b, {name, typ, groesse:S.tmpGroesse});
+    toast('✅ Boot aktualisiert');
+  } else {
+    S.boote.push({ id:S.nextBId++, name, typ, groesse:S.tmpGroesse });
+    toast('✅ Boot hinzugefügt');
+  }
+  closeBootModal(); renderBoote(); updateStats(); save();
+}
+
+function toggleBootAktiv(id) {
+  const b = S.boote.find(x => x.id === id);
+  if (!b) return;
+  b.aktiv = b.aktiv === false ? true : false;
+  save(); renderBoote(); updateStats();
+  toast(b.aktiv ? `✓ ${b.name} ist wieder im Einsatz` : `✗ ${b.name} wurde deaktiviert`);
+}
+
+function deleteBoot(id) {
+  if (!confirm('Boot wirklich löschen?')) return;
+  S.boote = S.boote.filter(b=>b.id!==id);
+  renderBoote(); updateStats(); save(); toast('🗑 Boot gelöscht');
+}
+
+function setGroesse(v) { S.tmpGroesse=v; updateSizes(); }
+function updateSizes() {
+  document.querySelectorAll('.sbsize').forEach((b,i)=>{
+    const on = (i+1)===S.tmpGroesse;
+    b.classList.toggle('on',on);
+  });
+}
+
+/* ====================================================================
+   DAY MANAGEMENT
+==================================================================== */
+function switchDay(i) { S.activeDay=i; renderEinteilung(); }
+
+function deleteDay(i) {
+  if (!confirm(`Tag ${i+1} wirklich löschen?`)) return;
+  S.tage.splice(i,1);
+  if (S.activeDay>=S.tage.length && S.activeDay>0) S.activeDay--;
+  save(); renderEinteilung(); updateStats(); toast('🗑 Tag gelöscht');
+}
+
+function clearAllDays() {
+  if (!confirm('Alle Tages-Einteilungen wirklich löschen?')) return;
+  S.tage=[]; S.activeDay=0;
+  save(); renderEinteilung(); updateStats(); toast('🗑 Alle Tage gelöscht');
+}
+
+/* ====================================================================
+   SWAP
+==================================================================== */
+let swapState = { personId: null, dayIdx: null, targetBootId: null };
+
+function openSwapModal(personId, dayIdx, targetBootId = null) {
+  const tag = S.tage[dayIdx];
+  if (!tag) return;
+
+  swapState = { personId, dayIdx, targetBootId };
+
+  // Build lookup: personId → bootId
+  const personBoot = {};
+  tag.boote.forEach(ba => ba.besatzung.forEach(id => { personBoot[id] = ba.bootId; }));
+
+  const allAssigned = new Set(tag.boote.flatMap(ba => ba.besatzung));
+  const unassigned  = S.personen.filter(p => !allAssigned.has(p.id) && p.aktiv !== false);
+
+  const selPerson = personId ? S.personen.find(p => p.id === personId) : null;
+  const selBoot   = personId ? S.boote.find(b => b.id === personBoot[personId]) : null;
+  const tgtBoot   = targetBootId ? S.boote.find(b => b.id === targetBootId) : null;
+
+  // Modal title & subtitle
+  if (selPerson) {
+    document.getElementById('swap-title').textContent = `${esc(selPerson.name)} tauschen`;
+    document.getElementById('swap-sub').textContent =
+      selBoot ? `Aktuell in: ${selBoot.name}` : '';
+  } else {
+    document.getElementById('swap-title').textContent = `Person hinzufügen`;
+    document.getElementById('swap-sub').textContent =
+      tgtBoot ? `Freier Platz in: ${tgtBoot.name}` : '';
+  }
+
+  // Build list: all people the user can swap with / move here
+  // Grouped by boat, plus unassigned
+  let html = '';
+
+  tag.boote.forEach(ba => {
+    const boot = S.boote.find(b => b.id === ba.bootId);
+    if (!boot) return;
+    const candidates = ba.besatzung
+      .map(id => S.personen.find(p => p.id === id))
+      .filter(p => p && p.id !== personId);   // exclude the selected person itself
+    if (!candidates.length) return;
+
+    html += `<div class="swap-boot-label">🚤 ${esc(boot.name)}</div>`;
+    candidates.forEach(p => {
+      const ini = p.name.split(' ').map(n => n[0]||'').join('').toUpperCase().slice(0,2);
+      const bg  = p.istObmann ? '#e6b800' : '#5dade2';
+      const tc  = p.istObmann ? '#333' : '#fff';
+      html += `<div class="swap-person-row" onclick="executeSwap(${p.id})">
+        <div class="avatar" style="background:${bg};color:${tc};width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${ini}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${esc(p.name)}${p.istObmann?' ⚓':''}</div>
+          <div style="font-size:11px;color:var(--g600)">${'★'.repeat(p.staerke)}${'☆'.repeat(5-p.staerke)}</div>
+        </div>
+        <span class="swap-boat-tag">${esc(boot.name)}</span>
+      </div>`;
+    });
+  });
+
+  if (unassigned.length) {
+    html += `<div class="swap-boot-label">⚠️ Nicht zugeteilt</div>`;
+    unassigned.forEach(p => {
+      const ini = p.name.split(' ').map(n => n[0]||'').join('').toUpperCase().slice(0,2);
+      html += `<div class="swap-person-row" onclick="executeSwap(${p.id})">
+        <div class="avatar" style="background:var(--g500);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${ini}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${esc(p.name)}${p.istObmann?' ⚓':''}</div>
+          <div style="font-size:11px;color:var(--g600)">${'★'.repeat(p.staerke)}${'☆'.repeat(5-p.staerke)}</div>
+        </div>
+        <span class="swap-boat-tag" style="background:#f1f3f5;color:var(--g600)">nicht zugeteilt</span>
+      </div>`;
+    });
+  }
+
+  if (!html) {
+    html = `<div style="text-align:center;color:var(--g500);padding:24px">Keine anderen Personen verfügbar</div>`;
+  }
+
+  document.getElementById('swap-body').innerHTML = html;
+  document.getElementById('swap-overlay').classList.remove('hidden');
+}
+
+function executeSwap(targetPersonId) {
+  const { personId, dayIdx, targetBootId } = swapState;
+  const tag = S.tage[dayIdx];
+  if (!tag) return;
+
+  // Build personId → boot-assignment lookup
+  const personBootMap = {};
+  tag.boote.forEach(ba => ba.besatzung.forEach(id => { personBootMap[id] = ba; }));
+
+  if (personId) {
+    // Swap two people
+    const baA = personBootMap[personId];
+    const baB = personBootMap[targetPersonId];
+
+    if (baA && baB) {
+      // Both in boats → simple swap
+      const idxA = baA.besatzung.indexOf(personId);
+      const idxB = baB.besatzung.indexOf(targetPersonId);
+      baA.besatzung[idxA] = targetPersonId;
+      baB.besatzung[idxB] = personId;
+    } else if (baA && !baB) {
+      // A is in a boat, B is unassigned → replace A with B
+      const idxA = baA.besatzung.indexOf(personId);
+      baA.besatzung[idxA] = targetPersonId;
+    } else if (!baA && baB) {
+      // A is unassigned, B is in a boat → replace B with A
+      const idxB = baB.besatzung.indexOf(targetPersonId);
+      baB.besatzung[idxB] = personId;
+    }
+  } else if (targetBootId) {
+    // Empty seat clicked: move targetPersonId into this boat
+    const baTgt = tag.boote.find(ba => ba.bootId === targetBootId);
+    const baSrc = personBootMap[targetPersonId];
+    const boot  = S.boote.find(b => b.id === targetBootId);
+
+    if (baTgt && boot && baTgt.besatzung.length < boot.groesse) {
+      // Add to target boat
+      baTgt.besatzung.push(targetPersonId);
+      // Remove from source boat (if they were in one)
+      if (baSrc && baSrc.bootId !== targetBootId) {
+        baSrc.besatzung = baSrc.besatzung.filter(id => id !== targetPersonId);
+      }
+    }
+  }
+
+  save();
+  closeSwapModal();
+  renderEinteilung();
+  toast('✅ Besatzung geändert');
+}
+
+function closeSwapModal() {
+  document.getElementById('swap-overlay').classList.add('hidden');
+}
+
+/* ====================================================================
+   EXPORT
+==================================================================== */
+function exportTxt(dayIdx) {
+  const tag = S.tage[dayIdx];
+  if (!tag) return;
+  const dn = dayIdx + 1;
+  const lines = [];
+
+  tag.boote.forEach(ba => {
+    const boot = S.boote.find(b => b.id === ba.bootId);
+    if (!boot) return;
+    const crew = ba.besatzung.map(id => S.personen.find(p => p.id === id)).filter(Boolean);
+    lines.push(boot.name);
+    crew.forEach(p => lines.push(p.name));
+    lines.push('');
+  });
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Wanderfahrt_Tag${dn}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('📄 TXT heruntergeladen');
+}
+
+async function exportImg(dayIdx) {
+  const tag = S.tage[dayIdx];
+  if (!tag) return;
+  const dn = dayIdx + 1;
+
+  // Build a self-contained render div (off-screen)
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;padding:24px;background:#eef3f8;width:900px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+
+  // Header
+  const header = document.createElement('div');
+  header.style.cssText = 'background:linear-gradient(135deg,#0d2137,#1a3252);color:#fff;border-radius:10px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:12px';
+  header.innerHTML = `<span style="font-size:30px">🚣</span><div><div style="font-size:20px;font-weight:800">Wanderfahrt Einteilung — Tag ${dn}</div><div style="font-size:13px;opacity:.65;margin-top:2px">Stand: ${new Date().toLocaleDateString('de-DE')}</div></div>`;
+  wrap.appendChild(header);
+
+  // Boats grid
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px';
+
+  tag.boote.forEach(ba => {
+    const boot = S.boote.find(b => b.id === ba.bootId);
+    if (!boot) return;
+    const crew = ba.besatzung.map(id => S.personen.find(p => p.id === id)).filter(Boolean);
+    const total = crew.reduce((s, p) => s + p.staerke, 0);
+    const avg = crew.length ? (total / crew.length).toFixed(1) : '—';
+    const pct = boot.groesse * 5 > 0 ? Math.round(total / (boot.groesse * 5) * 100) : 0;
+    const obmann = crew.find(p => p.istObmann);
+
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border-radius:9px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.11)';
+
+    let inner = `<div style="background:linear-gradient(135deg,#1a3252,#2471a3);color:#fff;padding:13px 16px">
+      <div style="font-size:16px;font-weight:800">🚤 ${esc(boot.name)}</div>
+      <div style="font-size:12px;opacity:.75;margin-top:2px">${esc(boot.typ || '')}${boot.typ ? ' · ' : ''}${crew.length}/${boot.groesse} Plätze${obmann ? ' · ⚓ ' + esc(firstName(obmann.name)) : ''}</div>
+    </div><div style="padding:10px">`;
+
+    crew.forEach(p => {
+      const ini = p.name.split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2);
+      const bg = p.istObmann ? '#e6b800' : '#5dade2';
+      const tc = p.istObmann ? '#333' : '#fff';
+      inner += `<div style="display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:7px">
+        <div style="width:34px;height:34px;border-radius:50%;background:${bg};color:${tc};font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+        <div style="font-size:14px;font-weight:600">${esc(p.name)}${p.istObmann ? ' ⚓' : ''}</div>
+      </div>`;
+    });
+    for (let i = crew.length; i < boot.groesse; i++) {
+      inner += `<div style="display:flex;align-items:center;gap:10px;padding:7px 8px;opacity:.35">
+        <div style="width:34px;height:34px;border-radius:50%;border:2px dashed #adb5bd;display:flex;align-items:center;justify-content:center">·</div>
+        <span style="font-size:13px;color:#adb5bd">Freier Platz</span></div>`;
+    }
+    inner += `</div>`;
+    card.innerHTML = inner;
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+
+  // Footer
+  const foot = document.createElement('div');
+  foot.style.cssText = 'text-align:center;font-size:12px;color:#adb5bd;margin-top:18px';
+  foot.textContent = '🚣 Wanderfahrt Einteilung';
+  wrap.appendChild(foot);
+
+  document.body.appendChild(wrap);
+  toast('🖼️ Bild wird erstellt …');
+
+  try {
+    const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: '#eef3f8', useCORS: true, logging: false });
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `Wanderfahrt_Tag${dn}.png`;
+    a.click();
+    toast('🖼️ Bild heruntergeladen');
+  } catch(e) {
+    toast('❌ Bild konnte nicht erstellt werden');
+    console.error(e);
+  } finally {
+    document.body.removeChild(wrap);
+  }
+}
+
+/* ====================================================================
+   UTILITIES
+==================================================================== */
+function pk(a,b)    { return Math.min(a,b)+'-'+Math.max(a,b); }
+function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function firstName(n) { return n.split(' ')[0]; }
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; }
+
+function toast(msg) {
+  document.querySelector('.toast')?.remove();
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+}
+
+/* Modal close on backdrop click */
+document.getElementById('pm-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closePersonModal(); });
+document.getElementById('bm-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeBootModal(); });
+document.getElementById('swap-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeSwapModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closePersonModal();closeBootModal();closeSwapModal();} });
+
+/* ====================================================================
+   THEMES
+==================================================================== */
+const THEMES = {
+  marine:  { name:'Marine',          ico:'🔵', navy:'#1a3252', blue:'#2471a3', light:'#5dade2', sky:'#eaf4fb', bg:'#eef3f8' },
+  forst:   { name:'Forst',           ico:'🟢', navy:'#1a3d2b', blue:'#1e8449', light:'#52be80', sky:'#eafaf1', bg:'#edf7ee' },
+  rubin:   { name:'Rubin',           ico:'🔴', navy:'#641e16', blue:'#c0392b', light:'#e57373', sky:'#fdf2f2', bg:'#fdf0ef' },
+  lila:    { name:'Lila',            ico:'🟣', navy:'#4a235a', blue:'#8e44ad', light:'#c39bd3', sky:'#f5eef8', bg:'#f3edf7' },
+  sunset:  { name:'Sunset',          ico:'🟠', navy:'#784212', blue:'#e67e22', light:'#f0b27a', sky:'#fef5e7', bg:'#fdf2e9' },
+  nacht:   { name:'Nacht',           ico:'🌙', navy:'#0d1b2a', blue:'#1b3a6b', light:'#4a90d9', sky:'#e8f0fb', bg:'#1a2535' },
+};
+
+function applyTheme(key) {
+  const t = THEMES[key] || THEMES.marine;
+  const r = document.documentElement.style;
+  r.setProperty('--navy',       t.navy);
+  r.setProperty('--blue',       t.blue);
+  r.setProperty('--light-blue', t.light);
+  r.setProperty('--sky',        t.sky);
+  document.body.style.background = t.bg;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t.navy);
+  if (!S.cfg) S.cfg = { fahrtName:'Wanderfahrt', gewässer:'', theme:'marine' };
+  S.cfg.theme = key;
+  save();
+}
+
+/* ====================================================================
+   INIT
+==================================================================== */
+load();
+if (!S.cfg) S.cfg = { fahrtName:'Wanderfahrt', gewässer:'', theme:'marine' };
+applyTheme(S.cfg.theme || 'marine');
+updateHeader();
+renderPersonen();
+renderBoote();
+updateStats();
+
+function updateHeader() {
+  if (!S.cfg) return;
+  const name = S.cfg.fahrtName || 'Wanderfahrt Einteilung';
+  const sub  = S.cfg.gewässer  || 'Ruderboot Crew-Management';
+  document.getElementById('header-title').textContent = name;
+  document.getElementById('header-sub').textContent   = sub;
+  document.title = '🚣 ' + name;
+}
+
+/* ====================================================================
+   EINSTELLUNGEN TAB
+==================================================================== */
+function renderEinstellungen() {
+  const cfg   = S.cfg || {};
+  const theme = cfg.theme || 'marine';
+
+  /* Eingabefelder befüllen */
+  const nameEl = document.getElementById('cfg-name');
+  const gwEl   = document.getElementById('cfg-gwasser');
+  if (nameEl) nameEl.value = cfg.fahrtName || '';
+  if (gwEl)   gwEl.value   = cfg.gewässer  || '';
+
+  /* Theme-Swatches */
+  const swatchEl = document.getElementById('theme-swatches');
+  if (swatchEl) {
+    swatchEl.innerHTML = Object.entries(THEMES).map(([key, t]) => `
+      <div class="theme-item">
+        <div class="theme-swatch ${key === theme ? 'active' : ''}"
+             style="background:linear-gradient(135deg,${t.navy},${t.blue})"
+             onclick="applyTheme('${key}')" title="${t.name}"></div>
+        <div class="theme-swatch-label">${t.name}</div>
+      </div>`).join('');
+  }
+
+  /* Statistiken */
+  const statsEl = document.getElementById('cfg-stats');
+  if (!statsEl) return;
+
+  if (!S.tage.length) {
+    statsEl.innerHTML = `<div class="empty" style="padding:20px"><div style="font-size:32px">📊</div><div style="font-size:14px;margin-top:8px;color:var(--g500)">Noch keine Tage generiert</div></div>`;
+    return;
+  }
+
+  const pairHist = {};
+  const obmannDays = {};
+  let totalAssignments = 0;
+
+  (S.tage || []).forEach(tag => {
+    (tag.boote || []).forEach(ba => {
+      const crew = ba.besatzung || [];
+      totalAssignments += crew.length;
+      for (let i = 0; i < crew.length; i++) {
+        for (let j = i + 1; j < crew.length; j++) {
+          const k = pk(crew[i], crew[j]);
+          pairHist[k] = (pairHist[k] || 0) + 1;
+        }
+        const p = S.personen.find(x => x.id === crew[i]);
+        if (p && p.istObmann) obmannDays[crew[i]] = (obmannDays[crew[i]] || 0) + 1;
+      }
+    });
+  });
+
+  const topPairs = Object.entries(pairHist)
+    .map(([k, v]) => {
+      const [a, b] = k.split('-').map(Number);
+      const pa = S.personen.find(p => p.id === a);
+      const pb = S.personen.find(p => p.id === b);
+      return (pa && pb) ? { a: pa, b: pb, count: v } : null;
+    })
+    .filter(Boolean)
+    .sort((x, y) => y.count - x.count)
+    .slice(0, 5);
+
+  const topObmann = Object.entries(obmannDays)
+    .map(([id, c]) => ({ p: S.personen.find(x => x.id === +id), c }))
+    .filter(x => x.p)
+    .sort((a, b) => b.c - a.c)[0];
+
+  /* Statistiken in cfg-stats schreiben */
+  let statsHtml = `<div class="stat-grid">
+    <div class="stat-mini"><div class="stat-mini-val">${S.tage.length}</div><div class="stat-mini-lbl">Fahrt-Tage</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">${totalAssignments}</div><div class="stat-mini-lbl">Einteilungen gesamt</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">${S.personen.length}</div><div class="stat-mini-lbl">Teilnehmer</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">${Object.keys(pairHist).length}</div><div class="stat-mini-lbl">Einzigartige Paare</div></div>
+  </div>`;
+    if (topPairs.length) {
+    statsHtml += `<div style="margin-top:4px"><div class="flbl" style="margin-bottom:6px">🤝 Häufigste Boot-Partner</div>`;
+    topPairs.forEach(({a, b, count}) => {
+      statsHtml += `<div class="pair-row">
+        <span style="font-size:18px">${(a.name[0]||'').toUpperCase()}</span>
+        <span>${esc(firstName(a.name))}</span>
+        <span style="color:var(--g500)">+</span>
+        <span style="font-size:18px">${(b.name[0]||'').toUpperCase()}</span>
+        <span>${esc(firstName(b.name))}</span>
+        <span class="pair-count">${count}×</span>
+      </div>`;
+    });
+    statsHtml += '</div>';
+  }
+  statsEl.innerHTML = statsHtml;
+}
+
+function saveCfgName() {
+  if (!S.cfg) S.cfg = { fahrtName:'', gewässer:'', theme:'marine' };
+  S.cfg.fahrtName = document.getElementById('cfg-name').value;
+  updateHeader(); save();
+}
+function saveCfgGwasser() {
+  if (!S.cfg) S.cfg = { fahrtName:'', gewässer:'', theme:'marine' };
+  S.cfg.gewässer = document.getElementById('cfg-gwasser').value;
+  updateHeader(); save();
+}
+
+function resetAllData() {
+  if (!confirm('Wirklich ALLE Daten löschen?\n\nPersonen, Boote und alle Einteilungen werden unwiderruflich entfernt.\n\nTipp: Vorher exportieren!')) return;
+  S.personen = []; S.boote = []; S.tage = [];
+  S.nextPId = 1; S.nextBId = 1; S.activeDay = 0;
+  save(); renderPersonen(); renderBoote(); renderEinstellungen(); updateStats();
+  toast('🗑️ Alle Daten gelöscht');
+}
+
+/* ====================================================================
+   IMPORT / EXPORT
+==================================================================== */
+function exportData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    cfg: S.cfg,
+    personen: S.personen,
+    boote: S.boote,
+    tage: S.tage,
+    nextPId: S.nextPId,
+    nextBId: S.nextBId
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const name = (S.cfg?.fahrtName || 'Wanderfahrt').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g,'_');
+  const date = new Date().toLocaleDateString('de-DE').replace(/\./g,'-');
+  a.download = `${name}_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('📤 Daten exportiert');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      let pCount, bCount, tCount;
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (!Array.isArray(data.personen) || !Array.isArray(data.boote))
+          throw new Error('Ungültiges Format');
+
+        pCount = data.personen.length;
+        bCount = data.boote.length;
+        tCount = (data.tage || []).length;
+        const exportedAt = data.exportedAt
+          ? new Date(data.exportedAt).toLocaleString('de-DE')
+          : '—';
+
+        if (!confirm(
+          `Daten importieren?\n\n` +
+          `📅 Exportiert am: ${exportedAt}\n` +
+          `👥 ${pCount} Person${pCount !== 1 ? 'en' : ''}\n` +
+          `🚤 ${bCount} Boot${bCount !== 1 ? 'e' : ''}\n` +
+          `📋 ${tCount} Fahrt-Tag${tCount !== 1 ? 'e' : ''}\n\n` +
+          `⚠️ Deine aktuellen Daten werden überschrieben!`
+        )) return;
+
+        S.personen = data.personen;
+        S.boote    = data.boote;
+        S.tage     = data.tage || [];
+        S.personen.forEach(p => { if (!p.vorlieben) p.vorlieben = []; });
+        S.nextPId  = data.nextPId  || (Math.max(0, ...data.personen.map(p => p.id), 0) + 1);
+        S.nextBId  = data.nextBId  || (Math.max(0, ...data.boote.map(b => b.id), 0) + 1);
+        S.activeDay = 0;
+        if (data.cfg) { S.cfg = { ...S.cfg, ...data.cfg }; applyTheme(S.cfg.theme); updateHeader(); }
+        save();
+      } catch(err) {
+        toast('❌ Import fehlgeschlagen: Ungültige Datei');
+        return;
+      }
+      renderPersonen();
+      renderBoote();
+      renderEinteilung();
+      renderEinstellungen();
+      updateStats();
+      toast(`✅ Import erfolgreich — ${pCount} Personen, ${bCount} Boote, ${tCount} Tage`);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* ====================================================================
+   PWA — Service Worker + Install Prompt
+==================================================================== */
+let deferredPrompt = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.remove('hidden');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.add('hidden');
+  toast('✅ App erfolgreich installiert!');
+  deferredPrompt = null;
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('install-banner').classList.add('hidden');
+  });
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.add('hidden');
+}
+</script>
+
+<!-- SWAP MODAL -->
+<div class="overlay hidden" id="swap-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="swap-title">Person tauschen</div>
+        <div style="font-size:12px;color:var(--g600);margin-top:3px" id="swap-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeSwapModal()">✕</button>
+    </div>
+    <div class="modal-body" id="swap-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeSwapModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div class="install-banner hidden" id="install-banner">
+  <div class="install-banner-icon">🚣</div>
+  <div class="install-banner-text">
+    <div class="install-banner-title">App installieren</div>
+    <div class="install-banner-sub">Zum Startbildschirm hinzufügen — funktioniert auch offline</div>
+  </div>
+  <div class="install-banner-btns">
+    <button class="btn-install" onclick="installApp()">Installieren</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+
+</body>
+</html>
