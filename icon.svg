@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#1a3252"/>
+  <!-- water -->
+  <ellipse cx="256" cy="370" rx="200" ry="28" fill="#2471a3" opacity="0.5"/>
+  <!-- boat hull -->
+  <path d="M100 310 Q256 360 412 310 L390 340 Q256 395 122 340 Z" fill="#5dade2"/>
+  <!-- rower body -->
+  <ellipse cx="256" cy="280" rx="22" ry="28" fill="#fff"/>
+  <!-- rower head -->
+  <circle cx="256" cy="245" r="20" fill="#fde3c0"/>
+  <!-- left oar -->
+  <line x1="130" y1="290" x2="256" y2="295" stroke="#e6b800" stroke-width="8" stroke-linecap="round"/>
+  <!-- right oar -->
+  <line x1="382" y1="290" x2="256" y2="295" stroke="#e6b800" stroke-width="8" stroke-linecap="round"/>
+  <!-- oar blades left -->
+  <ellipse cx="118" cy="292" rx="18" ry="9" fill="#e6b800" transform="rotate(-10 118 292)"/>
+  <!-- oar blades right -->
+  <ellipse cx="394" cy="292" rx="18" ry="9" fill="#e6b800" transform="rotate(10 394 292)"/>
+</svg>
