@@ -666,6 +666,14 @@
       </div>
 
 
+      <!-- Theme -->
+      <div class="cfg-section">
+        <div class="cfg-section-head"><span class="cfg-section-ico">🎨</span><span class="cfg-section-title">Design / Theme</span></div>
+        <div class="cfg-section-body">
+          <div class="theme-row" id="theme-swatches"></div>
+        </div>
+      </div>
+
       <!-- Import / Export -->
       <div class="cfg-section">
         <div class="cfg-section-head"><span class="cfg-section-ico">💾</span><span class="cfg-section-title">Import / Export</span></div>
@@ -973,19 +981,44 @@ function renderEinteilung() {
 function renderDayContent(tag, el) {
   const dn = S.activeDay + 1;
   const assigned = new Set(tag.boote.flatMap(b=>b.besatzung));
-  const unassigned = S.personen.filter(p=>!assigned.has(p.id));
+  const unassigned = S.personen.filter(p=>p.aktiv !== false && !assigned.has(p.id));
 
   let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <h2 style="font-size:18px;font-weight:800;color:var(--navy)">Tag ${dn} — Bootseinteilung</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-outline btn-sm" onclick="exportTxt(${S.activeDay})">📄 Als TXT</button>
       <button class="btn btn-outline btn-sm" onclick="exportImg(${S.activeDay})">🖼️ Als Bild</button>
+      <button class="btn btn-outline btn-sm" onclick="openQrModal(${S.activeDay})">🔗 Teilen</button>
       <button class="btn btn-ghost btn-sm" onclick="deleteDay(${S.activeDay})">🗑 Tag löschen</button>
     </div>
   </div>`;
 
-  if (unassigned.length)
-    html += `<div class="warnbox">⚠️ Nicht zugeteilt (zu wenig Plätze): <strong>${unassigned.map(p=>esc(p.name)).join(', ')}</strong></div>`;
+  // Nicht-eingeteilt panel with drag & drop
+  if (unassigned.length) {
+    html += `<div class="unassigned-panel">
+      <div class="unassigned-head">
+        <span style="font-size:16px">⚠️</span>
+        <span class="unassigned-head-title">Nicht eingeteilt</span>
+        <span class="unassigned-count">${unassigned.length}</span>
+        <span style="font-size:12px;color:var(--g600);margin-left:4px">— ziehe Personen in ein Boot</span>
+      </div>
+      <div class="unassigned-list drop-zone" id="unassigned-zone" data-boot-id="unassigned"
+           ondragover="onDragOver(event,'unassigned')" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'unassigned')">
+        ${unassigned.map(p => {
+          const ini = p.name.split(' ').map(n=>n[0]||'').join('').toUpperCase().slice(0,2);
+          return `<div class="person-chip ${p.istObmann?'obmann-chip':''}"
+            draggable="true"
+            data-pid="${p.id}"
+            ondragstart="onDragStart(event,${p.id},'unassigned')"
+            ondragend="onDragEnd(event)">
+            <span class="drag-handle">⠿</span>
+            <span class="chip-avatar">${ini}</span>
+            ${esc(p.name)}${p.istObmann?' ⚓':''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
 
   html += '<div class="boats-grid">';
   tag.boote.forEach(ba => {
@@ -996,27 +1029,37 @@ function renderDayContent(tag, el) {
     const avg = crew.length ? (total/crew.length).toFixed(1) : '—';
     const pct = boot.groesse*5 > 0 ? Math.round(total/(boot.groesse*5)*100) : 0;
     const obmann = crew.find(p=>p.istObmann);
+    const isFull = crew.length >= boot.groesse;
 
-    html += `<div class="boot-card">
+    html += `<div class="boot-card ${isFull?'':'has-space'}" id="boot-card-${ba.bootId}">
       <div class="boot-head">
         <div class="boot-name">🚤 ${esc(boot.name)}</div>
         <div class="boot-meta">${esc(boot.typ||'')}${boot.typ?' · ':''}${crew.length}/${boot.groesse} Plätze${obmann?' · ⚓ '+esc(firstName(obmann.name)):''}</div>
       </div>
       <div class="boot-body">
+        <div class="drop-zone crew-drop-zone" id="crew-zone-${ba.bootId}" data-boot-id="${ba.bootId}"
+             ondragover="onDragOver(event,${ba.bootId})" ondragleave="onDragLeave(event)" ondrop="onDrop(event,${ba.bootId})">
         ${crew.map(p=>{
           const ini = p.name.split(' ').map(n=>n[0]||'').join('').toUpperCase().slice(0,2);
-          return `<div class="crew-row clickable" onclick="openSwapModal(${p.id}, ${S.activeDay})">
+          return `<div class="crew-row clickable"
+            draggable="true"
+            data-pid="${p.id}"
+            ondragstart="onDragStart(event,${p.id},${ba.bootId})"
+            ondragend="onDragEnd(event)"
+            onclick="openSwapModal(${p.id}, ${S.activeDay})">
+            <span class="drag-handle">⠿</span>
             <div class="avatar ${p.istObmann?'obmann':''}">${ini}</div>
             <div>
               <div class="crew-name">${esc(p.name)}${p.istObmann?' ⚓':''}</div>
               <div class="crew-stars">${'★'.repeat(p.staerke)}${'☆'.repeat(5-p.staerke)}</div>
             </div></div>`;
         }).join('')}
-        ${Array.from({length:boot.groesse-crew.length},(_,slotIdx)=>`
+        ${Array.from({length:boot.groesse-crew.length},()=>`
           <div class="empty-seat clickable" onclick="openSwapModal(null, ${S.activeDay}, ${ba.bootId})">
             <div class="empty-avatar">+</div>
             <span style="font-size:13px;color:var(--blue);font-weight:600">Person hinzufügen</span>
           </div>`).join('')}
+        </div>
         <div class="strength-bar"><div class="strength-fill" style="width:${pct}%"></div></div>
         <div class="strength-lbl">Ø Stärke: ${avg} · Gesamt: ${total}</div>
       </div></div>`;
@@ -1154,6 +1197,17 @@ function improve(crews, personen, hist, prefs, maxIter) {
 /* ====================================================================
    PERSON MODAL
 ==================================================================== */
+function openModal(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('hidden');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('visible');
+  el.addEventListener('transitionend', () => el.classList.add('hidden'), { once: true });
+}
+
 function openPersonModal(id=null) {
   S.editPersId = id;
   const p = id!==null ? S.personen.find(x=>x.id===id) : null;
@@ -1163,10 +1217,10 @@ function openPersonModal(id=null) {
   S.tmpStaerke = p ? p.staerke : 3;
   updateStars();
   renderPsel(p ? p.vorlieben : [], id);
-  document.getElementById('pm-overlay').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('pm-name').focus(), 50);
+  openModal('pm-overlay');
+  setTimeout(()=>document.getElementById('pm-name').focus(), 80);
 }
-function closePersonModal() { document.getElementById('pm-overlay').classList.add('hidden'); }
+function closePersonModal() { closeModal('pm-overlay'); }
 
 function renderPsel(sel, excludeId) {
   const others = S.personen.filter(p=>p.id!==excludeId);
@@ -1225,10 +1279,10 @@ function openBootModal(id=null) {
   document.getElementById('bm-typ').value  = b ? b.typ||'' : '';
   S.tmpGroesse = b ? b.groesse : 4;
   updateSizes();
-  document.getElementById('bm-overlay').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('bm-name').focus(), 50);
+  openModal('bm-overlay');
+  setTimeout(()=>document.getElementById('bm-name').focus(), 80);
 }
-function closeBootModal() { document.getElementById('bm-overlay').classList.add('hidden'); }
+function closeBootModal() { closeModal('bm-overlay'); }
 
 function saveBoot() {
   const name = document.getElementById('bm-name').value.trim();
@@ -1366,7 +1420,7 @@ function openSwapModal(personId, dayIdx, targetBootId = null) {
   }
 
   document.getElementById('swap-body').innerHTML = html;
-  document.getElementById('swap-overlay').classList.remove('hidden');
+  openModal('swap-overlay');
 }
 
 function executeSwap(targetPersonId) {
@@ -1421,7 +1475,7 @@ function executeSwap(targetPersonId) {
 }
 
 function closeSwapModal() {
-  document.getElementById('swap-overlay').classList.add('hidden');
+  closeModal('swap-overlay');
 }
 
 /* ====================================================================
@@ -1549,7 +1603,8 @@ function toast(msg) {
 document.getElementById('pm-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closePersonModal(); });
 document.getElementById('bm-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeBootModal(); });
 document.getElementById('swap-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeSwapModal(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closePersonModal();closeBootModal();closeSwapModal();} });
+document.getElementById('qr-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeQrModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closePersonModal();closeBootModal();closeSwapModal();closeQrModal();} });
 
 /* ====================================================================
    THEMES
@@ -1796,6 +1851,321 @@ function importData() {
     reader.readAsText(file);
   };
   input.click();
+}
+
+/* ====================================================================
+   DRAG & DROP
+==================================================================== */
+let dragState = { personId: null, fromBootId: null };
+
+function onDragStart(e, personId, fromBootId) {
+  dragState = { personId, fromBootId };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(personId));
+  const el = e.currentTarget;
+  el.classList.add('dragging');
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.drag-over').forEach(z => z.classList.remove('drag-over'));
+  document.querySelectorAll('.drag-over-card').forEach(c => c.classList.remove('drag-over-card'));
+}
+
+function onDragOver(e, targetBootId) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const zone = e.currentTarget;
+  zone.classList.add('drag-over');
+  // Highlight parent boot-card too
+  const card = zone.closest('.boot-card');
+  if (card) card.classList.add('drag-over-card');
+}
+
+function onDragLeave(e) {
+  const zone = e.currentTarget;
+  // Only remove if leaving the zone itself (not entering a child)
+  if (!zone.contains(e.relatedTarget)) {
+    zone.classList.remove('drag-over');
+    const card = zone.closest('.boot-card');
+    if (card) card.classList.remove('drag-over-card');
+  }
+}
+
+function onDrop(e, targetBootId) {
+  e.preventDefault();
+  const zone = e.currentTarget;
+  zone.classList.remove('drag-over');
+  const card = zone.closest('.boot-card');
+  if (card) card.classList.remove('drag-over-card');
+
+  const { personId, fromBootId } = dragState;
+  if (personId === null) return;
+
+  const tag = S.tage[S.activeDay];
+  if (!tag) return;
+
+  const isTargetUnassigned = targetBootId === 'unassigned';
+  const isFromUnassigned   = fromBootId   === 'unassigned';
+
+  if (fromBootId === targetBootId) return; // no-op, same zone
+
+  if (isTargetUnassigned) {
+    // Drag from boat → unassigned: remove from boat
+    if (!isFromUnassigned) {
+      const baSrc = tag.boote.find(ba => ba.bootId === fromBootId);
+      if (baSrc) baSrc.besatzung = baSrc.besatzung.filter(id => id !== personId);
+    }
+  } else {
+    // Drag into a boat
+    const baTgt = tag.boote.find(ba => ba.bootId === targetBootId);
+    if (!baTgt) return;
+    const boot  = S.boote.find(b => b.id === targetBootId);
+    if (!boot)  return;
+
+    if (isFromUnassigned) {
+      // From unassigned → add to boat if space
+      if (baTgt.besatzung.length >= boot.groesse) { toast('⚠️ Boot ist voll!'); return; }
+      baTgt.besatzung.push(personId);
+    } else {
+      // From another boat → swap or move
+      const baSrc = tag.boote.find(ba => ba.bootId === fromBootId);
+      if (!baSrc) return;
+
+      if (baTgt.besatzung.length < boot.groesse) {
+        // Space available: just move
+        baSrc.besatzung = baSrc.besatzung.filter(id => id !== personId);
+        baTgt.besatzung.push(personId);
+      } else {
+        // No space: swap with first non-Obmann or first person in target
+        // Find a swap candidate (prefer non-obmann to stay flexible)
+        const swapIdx = baTgt.besatzung.findIndex(id => {
+          const p = S.personen.find(x => x.id === id);
+          return p && !p.istObmann;
+        });
+        const swapId = swapIdx >= 0 ? baTgt.besatzung[swapIdx] : baTgt.besatzung[0];
+        if (swapId === undefined) { toast('⚠️ Boot ist voll!'); return; }
+
+        // Check: don't put two Obmänner in same boat
+        const dragPerson = S.personen.find(p => p.id === personId);
+        const targetHasOb = baTgt.besatzung.some(id => {
+          const p = S.personen.find(x => x.id === id);
+          return p && p.istObmann && id !== swapId;
+        });
+        if (dragPerson?.istObmann && targetHasOb) { toast('⚠️ Boot hat schon einen Obmann!'); return; }
+
+        const srcIdx = baSrc.besatzung.indexOf(personId);
+        baSrc.besatzung[srcIdx] = swapId;
+        baTgt.besatzung[swapIdx >= 0 ? swapIdx : 0] = personId;
+      }
+    }
+  }
+
+  save();
+  renderEinteilung();
+  toast('✅ Besatzung geändert');
+}
+
+/* ====================================================================
+   QR CODE / SHARE
+==================================================================== */
+function buildDayText(dayIdx) {
+  const tag = S.tage[dayIdx];
+  if (!tag) return '';
+  const lines = [`=== Tag ${dayIdx + 1} — Bootseinteilung ===`, ''];
+  tag.boote.forEach(ba => {
+    const boot = S.boote.find(b => b.id === ba.bootId);
+    if (!boot) return;
+    const crew = ba.besatzung.map(id => S.personen.find(p => p.id === id)).filter(Boolean);
+    lines.push(`🚤 ${boot.name} (${crew.length}/${boot.groesse})`);
+    crew.forEach(p => lines.push(`  ${p.istObmann ? '⚓' : '•'} ${p.name} (${'★'.repeat(p.staerke)})`));
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+
+function openQrModal(dayIdx) {
+  const text = buildDayText(dayIdx);
+  document.getElementById('qr-text').textContent = text;
+  // Max ~850 chars for QR API reliability
+  const qrData = encodeURIComponent(text.slice(0, 850));
+  document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}`;
+  openModal('qr-overlay');
+}
+
+function closeQrModal() { closeModal('qr-overlay'); }
+
+function copyQrText() {
+  const text = document.getElementById('qr-text').textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast('📋 Text kopiert!')).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('📋 Text kopiert!'); } catch(e) { toast('❌ Kopieren fehlgeschlagen'); }
+  document.body.removeChild(ta);
+}
+
+/* ====================================================================
+   STATISTIKEN
+==================================================================== */
+function renderStatistiken() {
+  const el = document.getElementById('statistiken-content');
+  if (!S.tage.length) {
+    el.innerHTML = `<div class="card"><div class="empty">
+      <div class="empty-ico">📊</div>
+      <div class="empty-ttl">Noch keine Daten vorhanden</div>
+      <div class="empty-sub">Generiere mindestens einen Fahrt-Tag um Statistiken zu sehen</div>
+    </div></div>`;
+    return;
+  }
+
+  // --- Compute stats ---
+  const einsatzCount = {}; // personId → count
+  const pairHist = {};     // 'a-b' → count
+  const dayStrengths = []; // per day avg strength
+
+  S.personen.forEach(p => { einsatzCount[p.id] = 0; });
+
+  S.tage.forEach((tag, di) => {
+    let dayTotal = 0, dayCount = 0;
+    tag.boote.forEach(ba => {
+      const crew = ba.besatzung.map(id => S.personen.find(p => p.id === id)).filter(Boolean);
+      crew.forEach(p => {
+        einsatzCount[p.id] = (einsatzCount[p.id] || 0) + 1;
+        dayTotal += p.staerke; dayCount++;
+      });
+      for (let i = 0; i < ba.besatzung.length; i++) {
+        for (let j = i + 1; j < ba.besatzung.length; j++) {
+          const k = pk(ba.besatzung[i], ba.besatzung[j]);
+          pairHist[k] = (pairHist[k] || 0) + 1;
+        }
+      }
+    });
+    dayStrengths.push(dayCount ? (dayTotal / dayCount) : 0);
+  });
+
+  // Top pairs
+  const topPairs = Object.entries(pairHist)
+    .map(([k, v]) => {
+      const [a, b] = k.split('-').map(Number);
+      const pa = S.personen.find(p => p.id === a);
+      const pb = S.personen.find(p => p.id === b);
+      return (pa && pb) ? { a: pa, b: pb, count: v } : null;
+    })
+    .filter(Boolean)
+    .sort((x, y) => y.count - x.count)
+    .slice(0, 5);
+
+  // Ranking sorted
+  const ranking = S.personen
+    .map(p => ({ p, count: einsatzCount[p.id] || 0 }))
+    .filter(x => x.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const maxCount = ranking.length ? ranking[0].count : 1;
+
+  // Max strength for bar scaling
+  const maxStrength = Math.max(...dayStrengths, 1);
+
+  // Unique pairs count
+  const uniquePairs = Object.keys(pairHist).length;
+  const totalAssignments = Object.values(einsatzCount).reduce((a,b)=>a+b,0);
+
+  let html = `<div class="stats-tab-grid">
+
+    <!-- Overview -->
+    <div class="stats-section">
+      <div class="stats-section-head">
+        <span class="stats-section-ico">📈</span>
+        <span class="stats-section-title">Gesamtübersicht</span>
+      </div>
+      <div class="stats-section-body">
+        <div class="overview-chips">
+          <div class="overview-chip">
+            <div class="overview-chip-val">${S.tage.length}</div>
+            <div class="overview-chip-lbl">Fahrt-Tage</div>
+          </div>
+          <div class="overview-chip">
+            <div class="overview-chip-val">${S.personen.filter(p=>p.aktiv!==false).length}</div>
+            <div class="overview-chip-lbl">Aktive Personen</div>
+          </div>
+          <div class="overview-chip">
+            <div class="overview-chip-val">${S.boote.filter(b=>b.aktiv!==false).length}</div>
+            <div class="overview-chip-lbl">Aktive Boote</div>
+          </div>
+          <div class="overview-chip">
+            <div class="overview-chip-val">${totalAssignments}</div>
+            <div class="overview-chip-lbl">Einteilungen</div>
+          </div>
+          <div class="overview-chip">
+            <div class="overview-chip-val">${uniquePairs}</div>
+            <div class="overview-chip-lbl">Einzigartige Paare</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking -->
+    <div class="stats-section">
+      <div class="stats-section-head">
+        <span class="stats-section-ico">🏆</span>
+        <span class="stats-section-title">Einsatz-Ranking</span>
+      </div>
+      <div class="stats-section-body">
+        ${ranking.length ? ranking.map((x, i) => `
+          <div class="ranking-row">
+            <span class="ranking-name" title="${esc(x.p.name)}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'  '} ${esc(firstName(x.p.name))}</span>
+            <div class="ranking-bar-wrap">
+              <div class="ranking-bar-fill" style="width:${Math.round(x.count/maxCount*100)}%"></div>
+            </div>
+            <span class="ranking-count">${x.count}×</span>
+          </div>`).join('') : '<div style="color:var(--g500);font-size:13px">Keine Daten</div>'}
+      </div>
+    </div>
+
+    <!-- Top Pairs -->
+    <div class="stats-section">
+      <div class="stats-section-head">
+        <span class="stats-section-ico">🤝</span>
+        <span class="stats-section-title">Häufigste Boot-Partner (Top 5)</span>
+      </div>
+      <div class="stats-section-body">
+        ${topPairs.length ? `<div class="pairs-list">${topPairs.map(({a,b,count}) => `
+          <div class="pair-chip">
+            ${esc(firstName(a.name))}
+            <span class="pair-x">✕</span>
+            ${esc(firstName(b.name))}
+            <span class="pair-badge">${count}×</span>
+          </div>`).join('')}</div>` : '<div style="color:var(--g500);font-size:13px">Noch keine Paare</div>'}
+      </div>
+    </div>
+
+    <!-- Day Strength -->
+    <div class="stats-section">
+      <div class="stats-section-head">
+        <span class="stats-section-ico">💪</span>
+        <span class="stats-section-title">Teamstärke pro Tag</span>
+      </div>
+      <div class="stats-section-body">
+        ${dayStrengths.map((strength, i) => `
+          <div class="day-strength-row">
+            <span class="day-strength-lbl">Tag ${i+1}</span>
+            <div class="day-strength-bar-wrap">
+              <div class="day-strength-bar-fill" style="width:${Math.round(strength/5*100)}%"></div>
+            </div>
+            <span class="day-strength-val">${strength.toFixed(1)}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+  </div>`;
+
+  el.innerHTML = html;
 }
 
 /* ====================================================================
