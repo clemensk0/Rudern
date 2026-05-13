@@ -681,7 +681,7 @@ function renderPersonen() {
     </tr></thead>
     <tbody>${S.personen.map(p => {
       const aktiv = p.aktiv !== false;
-      const vl = p.vorlieben.map(id => {
+      const vl = (p.vorlieben || []).map(id => {
         const x = S.personen.find(q=>q.id===id);
         return x ? `<span class="chip">${esc(firstName(x.name))}</span>` : '';
       }).join('');
@@ -1544,46 +1544,47 @@ function importData() {
   input.style.display = 'none';
   document.body.appendChild(input);
   input.onchange = e => {
-    document.body.removeChild(input);
     const file = e.target.files[0];
+    document.body.removeChild(input);
     if (!file) return;
     const reader = new FileReader();
     reader.onload = evt => {
-      let pCount, bCount, tCount;
+      let data;
       try {
-        const data = JSON.parse(evt.target.result);
-        if (!Array.isArray(data.personen) || !Array.isArray(data.boote))
-          throw new Error('Ungültiges Format');
-
-        pCount = data.personen.length;
-        bCount = data.boote.length;
-        tCount = (data.tage || []).length;
-        const exportedAt = data.exportedAt
-          ? new Date(data.exportedAt).toLocaleString('de-DE')
-          : '—';
-
-        if (!confirm(
-          `Daten importieren?\n\n` +
-          `📅 Exportiert am: ${exportedAt}\n` +
-          `👥 ${pCount} Person${pCount !== 1 ? 'en' : ''}\n` +
-          `🚤 ${bCount} Boot${bCount !== 1 ? 'e' : ''}\n` +
-          `📋 ${tCount} Fahrt-Tag${tCount !== 1 ? 'e' : ''}\n\n` +
-          `⚠️ Deine aktuellen Daten werden überschrieben!`
-        )) return;
-
-        S.personen = data.personen;
-        S.boote    = data.boote;
-        S.tage     = data.tage || [];
-        S.personen.forEach(p => { if (!p.vorlieben) p.vorlieben = []; });
-        S.nextPId  = data.nextPId  || (Math.max(0, ...data.personen.map(p => p.id), 0) + 1);
-        S.nextBId  = data.nextBId  || (Math.max(0, ...data.boote.map(b => b.id), 0) + 1);
-        S.activeDay = 0;
-        if (data.cfg) { S.cfg = { ...S.cfg, ...data.cfg }; applyTheme(S.cfg.theme); updateHeader(); }
-        save();
+        data = JSON.parse(evt.target.result);
       } catch(err) {
-        toast('❌ Import fehlgeschlagen: Ungültige Datei');
+        toast('❌ Import fehlgeschlagen: Keine gültige JSON-Datei');
         return;
       }
+      if (!Array.isArray(data.personen) || !Array.isArray(data.boote)) {
+        toast('❌ Import fehlgeschlagen: personen/boote fehlen');
+        return;
+      }
+
+      const pCount = data.personen.length;
+      const bCount = data.boote.length;
+      const tCount = (data.tage || []).length;
+      const exportedAt = data.exportedAt
+        ? new Date(data.exportedAt).toLocaleString('de-DE')
+        : '—';
+
+      if (!confirm(
+        `Daten importieren?\n\n` +
+        `📅 Exportiert am: ${exportedAt}\n` +
+        `👥 ${pCount} Person${pCount !== 1 ? 'en' : ''}\n` +
+        `🚤 ${bCount} Boot${bCount !== 1 ? 'e' : ''}\n` +
+        `📋 ${tCount} Fahrt-Tag${tCount !== 1 ? 'e' : ''}\n\n` +
+        `⚠️ Deine aktuellen Daten werden überschrieben!`
+      )) return;
+
+      S.personen  = data.personen.map(p => ({ vorlieben: [], ...p, id: Number(p.id) }));
+      S.boote     = data.boote.map(b => ({ ...b, id: Number(b.id) }));
+      S.tage      = data.tage || [];
+      S.nextPId   = Number(data.nextPId) || (Math.max(0, ...S.personen.map(p => p.id)) + 1);
+      S.nextBId   = Number(data.nextBId) || (Math.max(0, ...S.boote.map(b => b.id)) + 1);
+      S.activeDay = 0;
+      if (data.cfg) { S.cfg = { ...S.cfg, ...data.cfg }; applyTheme(S.cfg.theme); updateHeader(); }
+      save();
       renderPersonen();
       renderBoote();
       renderEinteilung();
