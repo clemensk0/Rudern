@@ -1520,12 +1520,16 @@ function exportData() {
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  a.href = url;
   const name = (S.cfg?.fahrtName || 'Wanderfahrt').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g,'_');
   const date = new Date().toLocaleDateString('de-DE').replace(/\./g,'-');
   a.download = `${name}_${date}.json`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
   toast('📤 Daten exportiert');
 }
 
@@ -1533,7 +1537,10 @@ function importData() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json';
+  input.style.display = 'none';
+  document.body.appendChild(input);
   input.onchange = e => {
+    document.body.removeChild(input);
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
