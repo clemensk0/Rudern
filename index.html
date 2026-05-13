@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🚣 Wanderfahrt Einteilung</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1a3252">
+  <meta name="theme-color" content="#0f2d1a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,10 +14,10 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
-      --navy:       #1a3252;
-      --blue:       #2471a3;
-      --light-blue: #5dade2;
-      --sky:        #eaf4fb;
+      --navy:       #0f2d1a;
+      --blue:       #1a6b35;
+      --light-blue: #3aab5e;
+      --sky:        #e8f5ec;
       --white:      #ffffff;
       --g100:       #f8f9fa;
       --g200:       #e9ecef;
@@ -34,14 +34,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #eef3f8;
+      background: #e4efe8;
       color: var(--g800);
       min-height: 100vh;
     }
 
     /* ── HEADER ── */
     header {
-      background: linear-gradient(135deg, #0d2137 0%, var(--navy) 60%, #1a4a7a 100%);
+      background: linear-gradient(135deg, #071a0e 0%, var(--navy) 60%, #1a4a2a 100%);
       color: #fff;
       padding: 0 20px;
       box-shadow: 0 3px 14px rgba(0,0,0,0.35);
@@ -607,7 +607,7 @@ let S = {
   editPersId: null, editBootId: null,
   tmpStaerke: 3, tmpGroesse: 4,
   nextPId: 1, nextBId: 1,
-  cfg: { fahrtName: 'Wanderfahrt', gewässer: '', theme: 'marine' }
+  cfg: { fahrtName: 'Wanderfahrt', gewässer: '', theme: 'forst' }
 };
 
 function save() {
@@ -1355,7 +1355,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closePersonModal()
 ==================================================================== */
 const THEMES = {
   marine:  { name:'Marine',          ico:'🔵', navy:'#1a3252', blue:'#2471a3', light:'#5dade2', sky:'#eaf4fb', bg:'#eef3f8' },
-  forst:   { name:'Forst',           ico:'🟢', navy:'#1a3d2b', blue:'#1e8449', light:'#52be80', sky:'#eafaf1', bg:'#edf7ee' },
+  forst:   { name:'Forst',           ico:'🟢', navy:'#0f2d1a', blue:'#1a6b35', light:'#3aab5e', sky:'#e8f5ec', bg:'#e4efe8' },
   rubin:   { name:'Rubin',           ico:'🔴', navy:'#641e16', blue:'#c0392b', light:'#e57373', sky:'#fdf2f2', bg:'#fdf0ef' },
   lila:    { name:'Lila',            ico:'🟣', navy:'#4a235a', blue:'#8e44ad', light:'#c39bd3', sky:'#f5eef8', bg:'#f3edf7' },
   sunset:  { name:'Sunset',          ico:'🟠', navy:'#784212', blue:'#e67e22', light:'#f0b27a', sky:'#fef5e7', bg:'#fdf2e9' },
